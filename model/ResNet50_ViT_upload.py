@@ -96,9 +96,6 @@ class ViT(nn.Module):
         num_patches = (image_height // patch_height) * (image_width // patch_width)
         reduction_ratio = 32
         patch_dim = patch_height * patch_width * (channels//reduction_ratio)
-        # 这个reduction ratio可以好好调一下，可以增加蛮多的。
-        # r=32  53.67
-        # r=16 57.72
         self.to_patch_embedding = nn.Sequential(
             nn.Conv2d(channels, channels//8, kernel_size=3, stride=1, padding=1),
             # nn.Conv2d(channels//8, channels//32, kernel_size=1),
@@ -106,9 +103,7 @@ class ViT(nn.Module):
             Rearrange('b c (h p1) (w p2) -> b (h w) (p1 p2 c)', p1 = patch_height, p2 = patch_width),
             nn.Linear(patch_dim, dim),
         )
-        # 位置编码，可学习的一维向量
-        self.pos_embedding = nn.Parameter(torch.randn(1, num_patches, dim))
-        # 分类token
+
         self.cls_token = nn.Parameter(torch.randn(1, 1, dim))
         self.dropout = nn.Dropout(emb_dropout)
         self.transformer = Transformer(dim, depth, heads, dim_head, mlp_dim, dropout)
@@ -179,7 +174,6 @@ class ViT_reduction(nn.Module):
         information = torch.softmax(y, -1)    
         entropy = -torch.sum(information * torch.log(information), dim=-1, keepdim=True)/2.0
         ones = torch.ones_like(entropy)
-        # 0.8=90.00
         mask = torch.where(entropy <= 0.75, ones, entropy).expand_as(x)
         zeros = torch.zeros_like(mask)
         mask = torch.where(entropy > 0.75, zeros, mask)
@@ -314,8 +308,7 @@ class ResNet(nn.Module):
                                        dilate=replace_stride_with_dilation[1])
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
                                        dilate=replace_stride_with_dilation[2])    
-        # 10,5,3 59.24
-        # 8,4,2 59.84
+   
         self.vit_1 = ViT_reduction(image_size=56,patch_size=7,dim=256,channels=256,depth=4,heads=4,mlp_dim=512,dropout=0.3,emb_dropout=0.3)
         self.vit_2 = ViT_reduction(image_size=28,patch_size=4,dim=512,channels=512,depth=4,heads=4,mlp_dim=1024,dropout=0.3,emb_dropout=0.3)
         self.vit_3 = ViT_reduction(image_size=14,patch_size=2,dim=1024,channels=1024,depth=4,heads=4,mlp_dim=2048,dropout=0.3,emb_dropout=0.3)
