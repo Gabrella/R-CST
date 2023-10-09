@@ -3,7 +3,6 @@
 COMPACT SELECTIVE TRANSFORMER BASED ON INFORMATION ENTROPY FOR FACIAL EXPRESSION RECOGNITION IN THE WILD
 ## Requirements
 - Python=3.8
-- tensorflow=2.6.0
 - PyTorch=1.10
 - torchvision=0.11.0
 - cudatoolkit=11.3
