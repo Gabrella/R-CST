@@ -1,5 +1,4 @@
 import argparse
-from locale import normalize
 import os
 from random import random
 import time
