@@ -383,7 +383,7 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
         x = self.fc(x)
-        x = x + p_1 + p_2 + p_3
+        x = x + (p_1 + p_2 + p_3) * 0.5
         return x
 
     def forward(self, x):
